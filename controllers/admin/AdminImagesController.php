@@ -614,11 +614,14 @@ class AdminImagesControllerCore extends AdminController
     /* Hook watermark optimization */
     protected function _regenerateWatermark($dir, $type = null)
     {
+	$id_shop = (int)Context::getContext()->shop->id;
+		
         $result = Db::getInstance()->executeS('
 		SELECT m.`name` FROM `'._DB_PREFIX_.'module` m
-		LEFT JOIN `'._DB_PREFIX_.'hook_module` hm ON hm.`id_module` = m.`id_module`
+		LEFT JOIN `'._DB_PREFIX_.'module_shop` ms ON ms.`id_module` = m.`id_module`
+		LEFT JOIN `'._DB_PREFIX_.'hook_module` hm ON hm.`id_module` = ms.`id_module` AND hm.`id_shop` = ms.`id_shop`
 		LEFT JOIN `'._DB_PREFIX_.'hook` h ON hm.`id_hook` = h.`id_hook`
-		WHERE h.`name` = \'actionWatermark\' AND m.`active` = 1');
+		WHERE h.`name` = \'actionWatermark\' AND m.`active` = 1 AND ms.`id_shop` = '.(int)$id_shop);
 
         if ($result && count($result)) {
             $productsImages = Image::getAllImages();
